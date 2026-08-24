@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор риска преждевременных родов</title>
+<style>
+:root{
+    --primary:#0077b6;
+    --primary-dark:#023e8a;
+    --bg:#f0f4f8;
+    --card:#fff;
+    --text:#1e293b;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --radius:16px;
+}
+*{box-sizing:border-box}
+body{
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:var(--text);margin:0;padding:20px;min-height:100vh;
+    display:flex;justify-content:center;align-items:flex-start
+}
+.container{
+    background:var(--card);max-width:760px;width:100%;border-radius:var(--radius);
+    box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;margin:20px auto
+}
+header{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;padding:30px;text-align:center
+}
+header h1{margin:0;font-size:24px;font-weight:700}
+header p{margin:8px 0 0;font-size:14px;opacity:.9}
+.content{padding:30px}
+.section-title{
+    font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--primary);
+    font-weight:700;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid var(--bg)
+}
+.section-title:first-child{margin-top:0}
+.form-row{margin-bottom:18px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+input[type=number],select{
+    width:100%;padding:12px 15px;border:1px solid var(--border);border-radius:10px;
+    font-size:15px;background:#f8fafc;outline:none
+}
+input[type=number]:focus,select:focus{
+    border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(0,119,182,.15)
+}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.helper-text{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+.btn-group{display:flex;gap:15px;margin-top:30px}
+button{
+    flex:1;padding:16px;border:0;border-radius:12px;font-size:16px;font-weight:600;
+    cursor:pointer;transition:.2s
+}
+.btn-calc{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:#fff;box-shadow:0 4px 12px rgba(102,126,234,.4)
+}
+.btn-calc:hover{transform:translateY(-2px)}
+.btn-reset{background:#f1f5f9;color:var(--muted)}
+.btn-reset:hover{background:#e2e8f0;color:var(--text)}
+#result{
+    margin-top:30px;padding:30px;border-radius:var(--radius);display:none;
+    background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);
+    border:2px solid #e2e8f0
+}
+.result-header{text-align:center}
+.result-label{font-size:16px;color:var(--muted);margin-bottom:15px;font-weight:500}
+.result-percent{
+    font-size:56px;font-weight:800;margin:10px 0;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent
+}
+.progress-container{
+    width:100%;height:16px;background:rgba(255,255,255,.6);border-radius:8px;
+    overflow:hidden;margin:25px 0;box-shadow:inset 0 2px 4px rgba(0,0,0,.1)
+}
+.progress-bar{
+    height:100%;border-radius:8px;transition:width 1s ease-out;
+    background:linear-gradient(90deg,#10b981 0%,#3b82f6 50%,#ef4444 100%)
+}
+.methodology-note{
+    font-size:12px;color:var(--muted);text-align:left;margin-top:20px;
+    padding-top:15px;border-top:1px solid #e2e8f0;line-height:1.55
+}
+.warning{
+    background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;
+    padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:20px
+}
+
+/* Справочник кодировки */
+.coding-reference{
+    margin-top:30px;padding:25px;background:#f8fafc;border-radius:var(--radius);
+    border:1px solid var(--border)
+}
+.coding-reference summary{
+    cursor:pointer;font-weight:700;color:var(--primary-dark);
+    font-size:15px;list-style:none;display:flex;align-items:center;gap:8px
+}
+.coding-reference summary::-webkit-details-marker{display:none}
+.coding-reference summary::before{
+    content:"📋";font-size:18px
+}
+.coding-reference[open] summary::before{content:"📖"}
+.coding-table{
+    width:100%;border-collapse:collapse;margin-top:15px;font-size:13px
+}
+.coding-table th{
+    background:var(--primary);color:#fff;padding:10px 12px;text-align:left;
+    font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px
+}
+.coding-table th:first-child{border-radius:8px 0 0 0}
+.coding-table th:last-child{border-radius:0 8px 0 0}
+.coding-table td{
+    padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top
+}
+.coding-table tr:last-child td{border-bottom:0}
+.coding-table tr:hover{background:#fff}
+.coding-table .var-name{font-weight:600;color:var(--primary-dark);white-space:nowrap}
+.coding-table .code-badge{
+    display:inline-block;background:#e0e7ff;color:var(--primary-dark);
+    padding:2px 8px;border-radius:4px;font-weight:600;font-size:12px;
+    margin-right:6px;min-width:20px;text-align:center
+}
+.coding-table .code-desc{color:var(--text);line-height:1.5}
+.coding-note{
+    margin-top:15px;padding:12px;background:#fff;border-left:3px solid var(--primary);
+    border-radius:6px;font-size:12px;color:var(--muted);line-height:1.5
+}
+
+@media(max-width:600px){
+    .grid-2{grid-template-columns:1fr}
+    body{padding:10px}.content{padding:20px}header{padding:24px 18px}
+    header h1{font-size:21px}
+    .coding-table{font-size:12px}
+    .coding-table th,.coding-table td{padding:8px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+    <h1>🩺 Калькулятор риска преждевременных родов</h1>
+    <p>Логистическая регрессия (метод GLS)</p>
+</header>
+
+<div class="content">
+
+<div class="warning">
+<strong>Важно.</strong> Калькулятор воспроизводит математическую модель логистической регрессии.
+Результат — расчётная вероятность преждевременных родов (y=1).
+Не заменяет клиническое решение врача.
+</div>
+
+<div class="section-title">Антропометрия</div>
+
+<div class="form-row">
+<label for="x1">1. Индекс массы тела (ИМТ), кг/м² — x₁</label>
+<input id="x1" type="number" min="0.1" max="100" step="0.1" placeholder="Например: 27.5">
+<div class="helper-text">Система автоматически переведёт значение в код (0–4)</div>
+</div>
+
+<div class="section-title">Инфекционный анамнез</div>
+
+<div class="form-row">
+<label for="x2">2. НКВИ — гестационный срок, когда заболела — x₂</label>
+<select id="x2">
+<option value="" selected disabled>Выберите вариант</option>
+<option value="0">Не болела (0)</option>
+<option value="4">0–6 недель (4)</option>
+<option value="2">6–12 недель (2)</option>
+<option value="3">13–27 недель (3)</option>
+<option value="4">28–40 недель (4)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x9">9. ОРВИ — x₉</label>
+<select id="x9">
+<option value="" selected disabled>Выберите вариант</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x5">5. Уреаплазмоз, хламидиоз — x₅</label>
+<select id="x5">
+<option value="" selected disabled>Выберите вариант</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x7">7. Инфекция мочевыводящих путей — x₇</label>
+<select id="x7">
+<option value="" selected disabled>Выберите вариант</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="section-title">Осложнения и факторы риска</div>
+
+<div class="grid-2">
+<div class="form-row">
+<label for="x3">3. ПРПО — x₃</label>
+<select id="x3">
+<option value="" selected disabled>Выберите</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x4">4. Другие плацентарные нарушения — x₄</label>
+<select id="x4">
+<option value="" selected disabled>Выберите</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x6">6. Задержка развития плода — x₆</label>
+<select id="x6">
+<option value="" selected disabled>Выберите</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+
+<div class="form-row">
+<label for="x8">8. Угроза прерывания — x₈</label>
+<select id="x8">
+<option value="" selected disabled>Выберите</option>
+<option value="0">Нет (0)</option><option value="1">Да (1)</option>
+</select>
+</div>
+</div>
+
+<div class="btn-group">
+<button class="btn-reset" onclick="resetForm()">Сбросить</button>
+<button class="btn-calc" onclick="calculate()">Рассчитать вероятность</button>
+</div>
+
+<div id="result"></div>
+
+<!-- СПРАВОЧНИК КОДИРОВКИ ПЕРЕМЕННЫХ -->
+<details class="coding-reference">
+<summary>Справочник кодировки переменных модели</summary>
+
+<table class="coding-table">
+<thead>
+<tr>
+    <th>Переменная</th>
+    <th>Код</th>
+    <th>Значение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td rowspan="6" class="var-name">x₁ — Код ИМТ<br>(индекс массы тела)</td>
+    <td><span class="code-badge">0</span></td>
+    <td class="code-desc">18,5 – 25 кг/м² (нормальная масса тела)</td>
+</tr>
+<tr>
+    <td><span class="code-badge">1</span></td>
+    <td class="code-desc">16 – 18,5 кг/м² (дефицит массы тела)<br>или 25 – 30 кг/м² (предожирение)</td>
+</tr>
+<tr>
+    <td><span class="code-badge">2</span></td>
+    <td class="code-desc">&lt; 16 кг/м² (сильный дефицит)<br>или 30 – 35 кг/м² (ожирение I ст.)</td>
+</tr>
+<tr>
+    <td><span class="code-badge">3</span></td>
+    <td class="code-desc">35 – 40 кг/м² (ожирение II ст.)</td>
+</tr>
+<tr>
+    <td><span class="code-badge">4</span></td>
+    <td class="code-desc">≥ 40 кг/м² (ожирение III ст.)</td>
+</tr>
+<tr>
+    <td colspan="2" class="code-desc" style="font-style:italic;color:var(--muted)">
+        Категоризация по ВОЗ с симметричным кодированием отклонений от нормы
+    </td>
+</tr>
+
+<tr>
+    <td rowspan="5" class="var-name">x₂ — Код НКВИ<br>(срок заболевания инфекцией)</td>
+    <td><span class="code-badge">0</span></td>
+    <td class="code-desc">Не болела</td>
+</tr>
+<tr>
+    <td><span class="code-badge">2</span></td>
+    <td class="code-desc">6 – 12 недель беременности</td>
+</tr>
+<tr>
+    <td><span class="code-badge">3</span></td>
+    <td class="code-desc">13 – 27 недель беременности</td>
+</tr>
+<tr>
+    <td><span class="code-badge">4</span></td>
+    <td class="code-desc">0 – 6 недель или 28 – 40 недель<br>(критические периоды)</td>
+</tr>
+<tr>
+    <td colspan="2" class="code-desc" style="font-style:italic;color:var(--muted)">
+        Код 4 присваивается I и III триместрам как наиболее критичным
+    </td>
+</tr>
+
+<tr>
+    <td class="var-name">x₃ — ПРПО</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да (преждевременное излитие околоплодных вод)</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₄ — Другие плацентарные нарушения</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₅ — Уреаплазмоз, хламидиоз</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₆ — Задержка развития плода</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₇ — Инфекция мочевыводящих путей</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₈ — Угроза прерывания</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+
+<tr>
+    <td class="var-name">x₉ — ОРВИ</td>
+    <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
+    <td class="code-desc">0 — нет, 1 — да</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+
+<script>
+const MODEL = {
+    intercept: -0.23686,
+    x1_bmi: 0.33550,
+    x2_nkvi: 0.40773,
+    x3_prpo: 1.72196,
+    x4_placental: -0.73888,
+    x5_infection: 2.85379,
+    x6_growth: 1.70876,
+    x7_urinary: -1.08715,
+    x8_threat: 0.92675,
+    x9_orvi: -1.63527
+};
+
+function bmiCode(bmi){
+    if (bmi < 16) return 2;
+    if (bmi < 18.5) return 1;
+    if (bmi < 25) return 0;
+    if (bmi < 30) return 1;
+    if (bmi < 35) return 2;
+    if (bmi < 40) return 3;
+    return 4;
+}
+
+function val(id){
+    const el = document.getElementById(id);
+    return el.value === "" ? null : Number(el.value);
+}
+
+function calculate(){
+    const bmi = Number(document.getElementById('x1').value);
+
+    if(!Number.isFinite(bmi) || bmi <= 0){
+        alert("Введите корректное значение ИМТ.");
+        return;
+    }
+
+    const x1 = bmiCode(bmi);
+    const x2 = val("x2");
+    const x3 = val("x3");
+    const x4 = val("x4");
+    const x5 = val("x5");
+    const x6 = val("x6");
+    const x7 = val("x7");
+    const x8 = val("x8");
+    const x9 = val("x9");
+
+    if([x2,x3,x4,x5,x6,x7,x8,x9].some(v => v === null)){
+        alert("Пожалуйста, заполните все поля.");
+        return;
+    }
+
+    const z = MODEL.intercept
+        + MODEL.x1_bmi * x1
+        + MODEL.x2_nkvi * x2
+        + MODEL.x3_prpo * x3
+        + MODEL.x4_placental * x4
+        + MODEL.x5_infection * x5
+        + MODEL.x6_growth * x6
+        + MODEL.x7_urinary * x7
+        + MODEL.x8_threat * x8
+        + MODEL.x9_orvi * x9;
+
+    const probability = 1 / (1 + Math.exp(-z));
+    const percent = probability * 100;
+
+    const result = document.getElementById("result");
+    result.style.display = "block";
+
+    result.innerHTML = `
+    <div class="result-header">
+        <div class="result-label">Вероятность преждевременных родов (y = 1)</div>
+        <div class="result-percent">${percent.toFixed(2)}%</div>
+
+        <div class="progress-container">
+            <div class="progress-bar" style="width:${Math.min(Math.max(percent,0),100)}%"></div>
+        </div>
+
+        <div class="methodology-note">
+            <strong>Входные данные модели:</strong><br>
+            x₁ (Код ИМТ) = ${x1} &nbsp;|&nbsp; x₂ (НКВИ) = ${x2} &nbsp;|&nbsp; x₃ (ПРПО) = ${x3}<br>
+            x₄ (Др. плацентарные нар.) = ${x4} &nbsp;|&nbsp; x (Уреаплазмоз, хламидиоз) = ${x5}<br>
+            x₆ (Задержка развития плода) = ${x6} &nbsp;|&nbsp; x₇ (Инф. мочевых путей) = ${x7}<br>
+            x₈ (Угроза прерывания) = ${x8} &nbsp;|&nbsp; x₉ (ОРВИ) = ${x9}<br><br>
+            <strong>Линейный предиктор:</strong> z = ${z.toFixed(5)}<br>
+            <strong>Формула:</strong> p = 1 / (1 + e<sup>−z</sup>) = ${percent.toFixed(4)}%<br><br>
+            Коэффициенты взяты из таблицы Parameter estimates (Statistica, метод GLS).
+            Результат следует интерпретировать в контексте клинической картины пациентки.
+        </div>
+    </div>`;
+
+    result.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function resetForm(){
+    document.getElementById("x1").value = "";
+    ["x2","x3","x4","x5","x6","x7","x8","x9"]
+        .forEach(id => document.getElementById(id).value = "");
+
+    const result = document.getElementById("result");
+    result.style.display = "none";
+    result.innerHTML = "";
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
