@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор риска преждевременных родов</title>
+<title>Калькулятор риска поздних преждевременных родов</title>
 <style>
 :root{
     --primary:#0077b6;
@@ -39,7 +39,7 @@ header p{margin:8px 0 0;font-size:14px;opacity:.9}
 }
 .section-title:first-child{margin-top:0}
 .form-row{margin-bottom:18px}
-label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:8px;line-height:1.4}
 input[type=number],select{
     width:100%;padding:12px 15px;border:1px solid var(--border);border-radius:10px;
     font-size:15px;background:#f8fafc;outline:none
@@ -90,7 +90,7 @@ button{
     padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:20px
 }
 
-/* Справочник кодировки */
+/* Справочник кодировки - ИСПРАВЛЕНО */
 .coding-reference{
     margin-top:30px;padding:25px;background:#f8fafc;border-radius:var(--radius);
     border:1px solid var(--border)
@@ -100,25 +100,46 @@ button{
     font-size:15px;list-style:none;display:flex;align-items:center;gap:8px
 }
 .coding-reference summary::-webkit-details-marker{display:none}
-.coding-reference summary::before{
-    content:"📋";font-size:18px
-}
+.coding-reference summary::before{content:"📋";font-size:18px}
 .coding-reference[open] summary::before{content:"📖"}
+
+/* ИСПРАВЛЕННАЯ ТАБЛИЦА */
 .coding-table{
-    width:100%;border-collapse:collapse;margin-top:15px;font-size:13px
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+    font-size:13px;
+    table-layout:fixed; /* ФИКСИРУЕМ ШИРИНЫ КОЛОНОК */
 }
 .coding-table th{
     background:var(--primary);color:#fff;padding:10px 12px;text-align:left;
     font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px
 }
-.coding-table th:first-child{border-radius:8px 0 0 0}
-.coding-table th:last-child{border-radius:0 8px 0 0}
+.coding-table th:first-child{
+    border-radius:8px 0 0 0;
+    width:35%; /* ФИКСИРОВАННАЯ ШИРИНА ПЕРВОЙ КОЛОНКИ */
+}
+.coding-table th:nth-child(2){width:15%} /* ВТОРАЯ КОЛОНКА */
+.coding-table th:last-child{
+    border-radius:0 8px 0 0;
+    width:50% /* ТРЕТЬЯ КОЛОНКА */
+}
 .coding-table td{
-    padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+    word-wrap:break-word; /* ПЕРЕНОС ДЛИННЫХ СЛОВ */
+    overflow-wrap:break-word
 }
 .coding-table tr:last-child td{border-bottom:0}
 .coding-table tr:hover{background:#fff}
-.coding-table .var-name{font-weight:600;color:var(--primary-dark);white-space:nowrap}
+.coding-table .var-name{
+    font-weight:600;
+    color:var(--primary-dark);
+    white-space:normal; /* РАЗРЕШАЕМ ПЕРЕНОС ТЕКСТА */
+    word-break:break-word;
+    line-height:1.4
+}
 .coding-table .code-badge{
     display:inline-block;background:#e0e7ff;color:var(--primary-dark);
     padding:2px 8px;border-radius:4px;font-weight:600;font-size:12px;
@@ -136,13 +157,16 @@ button{
     header h1{font-size:21px}
     .coding-table{font-size:12px}
     .coding-table th,.coding-table td{padding:8px}
+    .coding-table th:first-child{width:40%}
+    .coding-table th:nth-child(2){width:20%}
+    .coding-table th:last-child{width:40%}
 }
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-    <h1>🩺 Калькулятор риска преждевременных родов</h1>
+    <h1>🩺 Калькулятор риска поздних преждевременных родов</h1>
     <p>Логистическая регрессия (метод GLS)</p>
 </header>
 
@@ -165,7 +189,7 @@ button{
 <div class="section-title">Инфекционный анамнез</div>
 
 <div class="form-row">
-<label for="x2">2. НКВИ — гестационный срок, когда заболела — x₂</label>
+<label for="x2">2. Новая коронавирусная инфекция (COVID-19) — x₂</label>
 <select id="x2">
 <option value="" selected disabled>Выберите вариант</option>
 <option value="0">Не болела (0)</option>
@@ -177,7 +201,7 @@ button{
 </div>
 
 <div class="form-row">
-<label for="x9">9. ОРВИ — x₉</label>
+<label for="x9">9. Острая респираторная инфекция — x₉</label>
 <select id="x9">
 <option value="" selected disabled>Выберите вариант</option>
 <option value="0">Нет (0)</option><option value="1">Да (1)</option>
@@ -185,7 +209,7 @@ button{
 </div>
 
 <div class="form-row">
-<label for="x5">5. Уреаплазмоз, хламидиоз — x₅</label>
+<label for="x5">5. Инфекция (уреаплазмоз, микоплазмоз, токсоплазмоз, хламидиоз) — x₅</label>
 <select id="x5">
 <option value="" selected disabled>Выберите вариант</option>
 <option value="0">Нет (0)</option><option value="1">Да (1)</option>
@@ -204,7 +228,7 @@ button{
 
 <div class="grid-2">
 <div class="form-row">
-<label for="x3">3. ПРПО — x₃</label>
+<label for="x3">3. Преждевременный разрыв плодных оболочек— x₃</label>
 <select id="x3">
 <option value="" selected disabled>Выберите</option>
 <option value="0">Нет (0)</option><option value="1">Да (1)</option>
@@ -220,7 +244,7 @@ button{
 </div>
 
 <div class="form-row">
-<label for="x6">6. Задержка развития плода — x₆</label>
+<label for="x6">6. Недостаточный рост плода, требующий предоставления медицинской помощи матери — x₆</label>
 <select id="x6">
 <option value="" selected disabled>Выберите</option>
 <option value="0">Нет (0)</option><option value="1">Да (1)</option>
@@ -228,7 +252,7 @@ button{
 </div>
 
 <div class="form-row">
-<label for="x8">8. Угроза прерывания — x₈</label>
+<label for="x8">8. Угроза прерывания беременности— x₈</label>
 <select id="x8">
 <option value="" selected disabled>Выберите</option>
 <option value="0">Нет (0)</option><option value="1">Да (1)</option>
@@ -284,7 +308,7 @@ button{
 </tr>
 
 <tr>
-    <td rowspan="5" class="var-name">x₂ — Код НКВИ<br>(срок заболевания инфекцией)</td>
+    <td rowspan="5" class="var-name">x₂ — Новая коронавирусная инфекция (COVID-19)</td>
     <td><span class="code-badge">0</span></td>
     <td class="code-desc">Не болела</td>
 </tr>
@@ -307,7 +331,7 @@ button{
 </tr>
 
 <tr>
-    <td class="var-name">x₃ — ПРПО</td>
+    <td class="var-name">x₃ — Преждевременный разрыв плодных оболочек</td>
     <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
     <td class="code-desc">0 — нет, 1 — да (преждевременное излитие околоплодных вод)</td>
 </tr>
@@ -319,13 +343,13 @@ button{
 </tr>
 
 <tr>
-    <td class="var-name">x₅ — Уреаплазмоз, хламидиоз</td>
+    <td class="var-name">x₅ — Инфекция (уреаплазмоз, микоплазмоз, токсоплазмоз, хламидиоз)</td>
     <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
     <td class="code-desc">0 — нет, 1 — да</td>
 </tr>
 
 <tr>
-    <td class="var-name">x₆ — Задержка развития плода</td>
+    <td class="var-name">x — Недостаточный рост плода, требующий предоставления медицинской помощи матери</td>
     <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
     <td class="code-desc">0 — нет, 1 — да</td>
 </tr>
@@ -337,13 +361,13 @@ button{
 </tr>
 
 <tr>
-    <td class="var-name">x₈ — Угроза прерывания</td>
+    <td class="var-name">x₈ — Угроза прерывания беременности</td>
     <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
     <td class="code-desc">0 — нет, 1 — да</td>
 </tr>
 
 <tr>
-    <td class="var-name">x₉ — ОРВИ</td>
+    <td class="var-name">x₉ — Острая респираторная инфекция</td>
     <td><span class="code-badge">0</span> / <span class="code-badge">1</span></td>
     <td class="code-desc">0 — нет, 1 — да</td>
 </tr>
@@ -433,13 +457,12 @@ function calculate(){
 
         <div class="methodology-note">
             <strong>Входные данные модели:</strong><br>
-            x₁ (Код ИМТ) = ${x1} &nbsp;|&nbsp; x₂ (НКВИ) = ${x2} &nbsp;|&nbsp; x₃ (ПРПО) = ${x3}<br>
-            x₄ (Др. плацентарные нар.) = ${x4} &nbsp;|&nbsp; x (Уреаплазмоз, хламидиоз) = ${x5}<br>
-            x₆ (Задержка развития плода) = ${x6} &nbsp;|&nbsp; x₇ (Инф. мочевых путей) = ${x7}<br>
-            x₈ (Угроза прерывания) = ${x8} &nbsp;|&nbsp; x₉ (ОРВИ) = ${x9}<br><br>
+            x₁ (Код ИМТ) = ${x1} &nbsp;|&nbsp; x₂ (НКВИ) = ${x2} &nbsp;|&nbsp; x₃ (Преждевременный разрыв плодных оболочек) = ${x3}<br>
+            x₄ (Др. плацентарные нар.) = ${x4} &nbsp;|&nbsp; x₅ (Инфекция) = ${x5}<br>
+            x₆ (Недостаточный рост плода, требующий предоставления медицинской помощи матери) = ${x6} &nbsp;|&nbsp; x₇ (Инф. мочевых путей) = ${x7}<br>
+            x₈ (Угроза прерывания беременности) = ${x8} &nbsp;|&nbsp; x₉ (ОРВИ) = ${x9}<br><br>
             <strong>Линейный предиктор:</strong> z = ${z.toFixed(5)}<br>
             <strong>Формула:</strong> p = 1 / (1 + e<sup>−z</sup>) = ${percent.toFixed(4)}%<br><br>
-            Коэффициенты взяты из таблицы Parameter estimates (Statistica, метод GLS).
             Результат следует интерпретировать в контексте клинической картины пациентки.
         </div>
     </div>`;
